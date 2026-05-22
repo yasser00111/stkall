@@ -44,10 +44,17 @@ class MaterialResource extends Resource
                 ])->columns(2),
 
             Forms\Components\Section::make('Konten Materi')
+                ->columns(1)
                 ->schema([
                     Forms\Components\RichEditor::make('content')
                         ->label('Isi Materi (Teks)')
-                        ->columnSpanFull(),
+                        ->toolbarButtons([
+                            'bold', 'italic', 'underline', 'strike',
+                            'link', 'h2', 'h3',
+                            'bulletList', 'orderedList',
+                            'blockquote', 'codeBlock',
+                            'undo', 'redo',
+                        ]),
                     Forms\Components\TextInput::make('video_url')
                         ->label('URL Video YouTube')
                         ->placeholder('https://www.youtube.com/watch?v=...')
@@ -60,8 +67,7 @@ class MaterialResource extends Resource
                                 ->url(fn ($state) => $state ?: null)
                                 ->openUrlInNewTab()
                                 ->visible(fn ($state) => filled($state)),
-                        )
-                        ->columnSpanFull(),
+                        ),
                 ]),
 
             Forms\Components\Section::make('Asesmen (Soal Essay)')
