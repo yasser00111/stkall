@@ -38,12 +38,13 @@ class CourseController extends Controller
             'class.required' => 'Kelas wajib diisi.',
         ]);
 
-        $student = StudentSession::create([
-            'course_id'              => $course->id,
-            'name'                   => $validated['name'],
-            'class'                  => $validated['class'],
-            'current_material_order' => 0,
-        ]);
+        // Gunakan fill() + save() agar tidak bergantung pada mass assignment
+        $student = new StudentSession();
+        $student->course_id              = $course->id;
+        $student->name                   = $validated['name'];
+        $student->class                  = $validated['class'];
+        $student->current_material_order = 0;
+        $student->save();
 
         // Simpan ID sesi siswa di cookie browser
         $request->session()->put('student_session_id', $student->id);
