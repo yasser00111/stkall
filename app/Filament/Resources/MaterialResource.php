@@ -50,8 +50,17 @@ class MaterialResource extends Resource
                         ->columnSpanFull(),
                     Forms\Components\TextInput::make('video_url')
                         ->label('URL Video YouTube')
-                        ->url()
                         ->placeholder('https://www.youtube.com/watch?v=...')
+                        ->helperText('Tempel URL YouTube di sini, contoh: https://www.youtube.com/watch?v=abc123')
+                        ->suffixAction(
+                            Forms\Components\Actions\Action::make('preview_video')
+                                ->icon('heroicon-o-play-circle')
+                                ->label('Buka')
+                                ->tooltip('Buka video di tab baru')
+                                ->url(fn ($state) => $state ?: null)
+                                ->openUrlInNewTab()
+                                ->visible(fn ($state) => filled($state)),
+                        )
                         ->columnSpanFull(),
                 ]),
 
