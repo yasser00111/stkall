@@ -102,6 +102,23 @@ class AssessmentAnswerResource extends Resource
                         ->placeholder('Belum ada feedback'),
                 ])
                 ->hidden(fn (AssessmentAnswer $record) => $record->status === 'pending'),
+
+            Infolists\Components\Section::make('💬 Percakapan Feedback')
+                ->schema([
+                    Infolists\Components\TextEntry::make('teacher_feedback')
+                        ->label('Guru menulis:')
+                        ->placeholder('—')
+                        ->columnSpanFull(),
+                    Infolists\Components\TextEntry::make('student_reply')
+                        ->label('Balasan Siswa:')
+                        ->placeholder('Siswa belum membalas.')
+                        ->columnSpanFull(),
+                    Infolists\Components\TextEntry::make('student_replied_at')
+                        ->label('Waktu Balas')
+                        ->dateTime('d M Y H:i')
+                        ->placeholder('—'),
+                ])->columns(2)
+                ->hidden(fn (AssessmentAnswer $record) => $record->status === 'pending'),
         ]);
     }
 
@@ -135,6 +152,12 @@ class AssessmentAnswerResource extends Resource
                     ->label('Dikirim')
                     ->dateTime('d M Y H:i')
                     ->sortable(),
+                Tables\Columns\IconColumn::make('student_reply')
+                    ->label('Dibalas Siswa')
+                    ->boolean()
+                    ->getStateUsing(fn (AssessmentAnswer $record) => !empty($record->student_reply))
+                    ->trueColor('success')
+                    ->falseColor('gray'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
@@ -143,6 +166,15 @@ class AssessmentAnswerResource extends Resource
                         'pending' => 'Belum Dinilai',
                         'graded'  => 'Sudah Dinilai',
                     ]),
+                Tables\Filters\TernaryFilter::make('student_reply')
+                    ->label('Balasan Siswa')
+                    ->placeholder('Semua')
+                    ->trueLabel('Ada balasan')
+                    ->falseLabel('Belum dibalas')
+                    ->queries(
+                        true:  fn ($q) => $q->whereNotNull('student_reply'),
+                        false: fn ($q) => $q->whereNull('student_reply'),
+                    ),
             ])
             ->defaultSort('created_at', 'desc')
             ->actions([

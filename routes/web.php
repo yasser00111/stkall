@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Student\AssessmentController;
 use App\Http\Controllers\Student\CourseController;
+use App\Http\Controllers\Student\FeedbackController;
 use App\Http\Controllers\Student\MaterialController;
 use App\Http\Controllers\Student\ResumeController;
 use App\Http\Controllers\Student\TokenController;
@@ -34,4 +35,9 @@ Route::prefix('belajar/{slug}')->name('student.')->group(function () {
     // Asesmen
     Route::get('/asesmen/{assessmentId}', [AssessmentController::class, 'show'])->name('assessment.show');
     Route::post('/asesmen/{assessmentId}', [AssessmentController::class, 'store'])->name('assessment.store');
+
+    // Feedback & Nilai
+    Route::get('/feedback', [FeedbackController::class, 'index'])->name('feedback.index');
+    Route::post('/feedback/resume/{resumeId}/balas', [FeedbackController::class, 'replyResume'])->name('feedback.reply.resume');
+    Route::post('/feedback/asesmen/{answerId}/balas', [FeedbackController::class, 'replyAssessment'])->name('feedback.reply.assessment');
 });

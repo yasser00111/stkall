@@ -12,10 +12,12 @@ class Resume extends Model
     protected $fillable = [
         'student_session_id', 'material_id', 'content',
         'status', 'teacher_feedback', 'approved_at',
+        'student_reply', 'student_replied_at',
     ];
 
     protected $casts = [
-        'approved_at' => 'datetime',
+        'approved_at'        => 'datetime',
+        'student_replied_at' => 'datetime',
     ];
 
     public function studentSession()

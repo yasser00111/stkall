@@ -12,10 +12,12 @@ class AssessmentAnswer extends Model
     protected $fillable = [
         'assessment_id', 'student_session_id', 'answer',
         'status', 'score', 'teacher_feedback', 'graded_at',
+        'student_reply', 'student_replied_at',
     ];
 
     protected $casts = [
-        'graded_at' => 'datetime',
+        'graded_at'          => 'datetime',
+        'student_replied_at' => 'datetime',
     ];
 
     public function assessment()

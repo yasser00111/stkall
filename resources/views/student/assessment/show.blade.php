@@ -5,13 +5,22 @@
 <div class="py-6 max-w-2xl mx-auto">
 
     {{-- Breadcrumb --}}
-    <div class="flex items-center gap-2 text-sm text-gray-500 mb-6">
+    <div class="flex items-center justify-between mb-6">
         <a href="{{ route('student.material.show', ['slug' => $course->slug, 'materialId' => $assessment->material_id]) }}"
-            class="hover:text-blue-600 transition flex items-center gap-1">
+            class="text-sm text-gray-500 hover:text-blue-600 transition flex items-center gap-1">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
             Kembali ke Materi
+        </a>
+        {{-- Tombol ke halaman Nilai & Feedback --}}
+        <a href="{{ route('student.feedback.index', $course->slug) }}"
+            class="text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+            Nilai & Feedback
         </a>
     </div>
 
@@ -32,18 +41,35 @@
             </div>
         </div>
         <div class="p-6">
-            {{-- Status --}}
+
+            {{-- Status Nilai --}}
             @if($existingAnswer->status === 'graded')
             <div class="bg-green-50 border border-green-200 rounded-xl p-4 mb-5">
                 <div class="flex items-center justify-between">
-                    <div>
+                    <div class="flex-1">
                         <p class="font-semibold text-green-800">Sudah Dinilai ✅</p>
                         @if($existingAnswer->teacher_feedback)
-                            <p class="text-sm text-green-700 mt-1"><strong>Feedback guru:</strong> {{ $existingAnswer->teacher_feedback }}</p>
+                            <p class="text-sm text-green-700 mt-1 leading-relaxed">
+                                <strong>Feedback Guru:</strong> {{ $existingAnswer->teacher_feedback }}
+                            </p>
+                        @endif
+                        {{-- Balasan siswa --}}
+                        @if($existingAnswer->student_reply)
+                            <div class="mt-2 bg-white rounded-lg border border-green-200 p-2.5">
+                                <p class="text-xs text-green-600 font-medium mb-0.5">Balasan Anda:</p>
+                                <p class="text-sm text-gray-700">{{ $existingAnswer->student_reply }}</p>
+                            </div>
+                        @elseif($existingAnswer->teacher_feedback)
+                            <a href="{{ route('student.feedback.index', $course->slug) }}"
+                                class="inline-block mt-2 text-xs text-green-700 underline hover:text-green-900">
+                                Balas feedback guru →
+                            </a>
                         @endif
                     </div>
-                    <div class="text-center">
-                        <p class="text-3xl font-bold text-green-700">{{ $existingAnswer->score }}</p>
+                    <div class="text-center ml-4 flex-shrink-0">
+                        <p class="text-4xl font-bold {{ $existingAnswer->score >= 75 ? 'text-green-600' : ($existingAnswer->score >= 60 ? 'text-yellow-600' : 'text-red-500') }}">
+                            {{ $existingAnswer->score }}
+                        </p>
                         <p class="text-xs text-green-600">/ 100</p>
                     </div>
                 </div>
@@ -70,6 +96,7 @@
             @endif
 
             @else
+            {{-- Menunggu nilai --}}
             <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-5">
                 <div class="flex items-center gap-3">
                     <svg class="w-5 h-5 text-yellow-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -77,13 +104,13 @@
                     </svg>
                     <div>
                         <p class="font-semibold text-yellow-800">Menunggu Penilaian ⏳</p>
-                        <p class="text-sm text-yellow-700">Jawaban Anda sedang ditinjau oleh guru. Token materi berikutnya akan diberikan setelah penilaian selesai.</p>
+                        <p class="text-sm text-yellow-700">Jawaban Anda sedang ditinjau oleh guru.</p>
                     </div>
                 </div>
             </div>
             @endif
 
-            {{-- Tampilkan jawaban yang sudah dikirim --}}
+            {{-- Jawaban yang dikirim --}}
             <div>
                 <p class="text-sm font-medium text-gray-700 mb-2">Jawaban yang Anda kirim:</p>
                 <div class="bg-gray-50 rounded-xl p-4 text-sm text-gray-700 leading-relaxed">
@@ -91,13 +118,25 @@
                 </div>
                 <p class="text-xs text-gray-400 mt-2">Dikirim {{ $existingAnswer->created_at->format('d M Y H:i') }}</p>
             </div>
+
+            {{-- Tombol ke halaman feedback lengkap --}}
+            <div class="mt-5 pt-5 border-t border-gray-100 text-center">
+                <a href="{{ route('student.feedback.index', $course->slug) }}"
+                    class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                    Lihat Semua Nilai & Feedback
+                </a>
+            </div>
+
         </div>
     </div>
 
     @else
     {{-- Form pengerjaan asesmen --}}
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-
         <div class="bg-gradient-to-r from-yellow-500 to-orange-500 px-6 py-5 text-white">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
@@ -153,9 +192,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         Jawaban Anda <span class="text-red-500">*</span>
                     </label>
-                    <textarea
-                        name="answer"
-                        rows="8"
+                    <textarea name="answer" rows="8"
                         placeholder="Tulis jawaban essay Anda di sini..."
                         class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none transition resize-y @error('answer') border-red-400 @enderror"
                     >{{ old('answer') }}</textarea>
