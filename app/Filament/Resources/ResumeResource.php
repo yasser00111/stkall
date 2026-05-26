@@ -89,8 +89,41 @@ class ResumeResource extends Resource
             Infolists\Components\Section::make('Isi Resume')
                 ->schema([
                     Infolists\Components\TextEntry::make('content')
-                        ->label('')
+                        ->label('Teks Resume')
+                        ->placeholder('(tidak ada teks)')
                         ->columnSpanFull(),
+
+                    // File upload
+                    Infolists\Components\TextEntry::make('file_name')
+                        ->label('File Upload')
+                        ->placeholder('Tidak ada file')
+                        ->formatStateUsing(fn ($state, Resume $record) => $state
+                            ? "📎 {$state}"
+                            : null)
+                        ->suffixAction(
+                            Infolists\Components\Actions\Action::make('download_file')
+                                ->label('Unduh / Lihat')
+                                ->icon('heroicon-o-arrow-down-tray')
+                                ->url(fn (Resume $record) => $record->file_url)
+                                ->openUrlInNewTab()
+                                ->visible(fn (Resume $record) => $record->hasFile()),
+                        )
+                        ->visible(fn (Resume $record) => $record->hasFile()),
+
+                    // Video URL
+                    Infolists\Components\TextEntry::make('video_url')
+                        ->label('Video YouTube')
+                        ->placeholder('Tidak ada video')
+                        ->formatStateUsing(fn ($state) => $state ? "🎬 {$state}" : null)
+                        ->suffixAction(
+                            Infolists\Components\Actions\Action::make('open_video')
+                                ->label('Tonton')
+                                ->icon('heroicon-o-play-circle')
+                                ->url(fn (Resume $record) => $record->video_url)
+                                ->openUrlInNewTab()
+                                ->visible(fn (Resume $record) => !empty($record->video_url)),
+                        )
+                        ->visible(fn (Resume $record) => !empty($record->video_url)),
                 ]),
 
             Infolists\Components\Section::make('Feedback Guru')
@@ -154,6 +187,20 @@ class ResumeResource extends Resource
                     ->label('Dikirim')
                     ->dateTime('d M Y H:i')
                     ->sortable(),
+                Tables\Columns\IconColumn::make('file_path')
+                    ->label('File')
+                    ->boolean()
+                    ->getStateUsing(fn (Resume $record) => !empty($record->file_path))
+                    ->trueIcon('heroicon-o-paper-clip')
+                    ->trueColor('purple')
+                    ->falseColor('gray'),
+                Tables\Columns\IconColumn::make('video_url')
+                    ->label('Video')
+                    ->boolean()
+                    ->getStateUsing(fn (Resume $record) => !empty($record->video_url))
+                    ->trueIcon('heroicon-o-play-circle')
+                    ->trueColor('danger')
+                    ->falseColor('gray'),
                 Tables\Columns\IconColumn::make('student_reply')
                     ->label('Dibalas Siswa')
                     ->boolean()
@@ -180,6 +227,24 @@ class ResumeResource extends Resource
                     ->queries(
                         true:  fn ($q) => $q->whereNotNull('student_reply'),
                         false: fn ($q) => $q->whereNull('student_reply'),
+                    ),
+                Tables\Filters\TernaryFilter::make('file_path')
+                    ->label('File Upload')
+                    ->placeholder('Semua')
+                    ->trueLabel('Ada file')
+                    ->falseLabel('Tanpa file')
+                    ->queries(
+                        true:  fn ($q) => $q->whereNotNull('file_path'),
+                        false: fn ($q) => $q->whereNull('file_path'),
+                    ),
+                Tables\Filters\TernaryFilter::make('video_url')
+                    ->label('Video YouTube')
+                    ->placeholder('Semua')
+                    ->trueLabel('Ada video')
+                    ->falseLabel('Tanpa video')
+                    ->queries(
+                        true:  fn ($q) => $q->whereNotNull('video_url'),
+                        false: fn ($q) => $q->whereNull('video_url'),
                     ),
             ])
             ->defaultSort('created_at', 'desc')

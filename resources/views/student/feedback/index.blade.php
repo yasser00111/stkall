@@ -208,8 +208,70 @@
 
             {{-- Isi Resume --}}
             <div>
-                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Resume Anda</p>
-                <p class="text-sm text-gray-700 bg-blue-50 rounded-lg p-3 leading-relaxed line-clamp-4">{{ $resume->content }}</p>
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Resume Anda</p>
+
+                {{-- Teks resume (jika ada) --}}
+                @if($resume->content)
+                <p class="text-sm text-gray-700 bg-blue-50 rounded-lg p-3 leading-relaxed mb-2">
+                    {{ \Illuminate\Support\Str::limit($resume->content, 300) }}
+                </p>
+                @endif
+
+                {{-- File upload (jika ada) --}}
+                @if($resume->hasFile())
+                <div class="flex items-center gap-3 bg-purple-50 border border-purple-200 rounded-xl p-3 mb-2">
+                    <div class="w-9 h-9 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        @if($resume->isImage())
+                            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                        @else
+                            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        @endif
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-purple-800 truncate">📎 {{ $resume->file_name }}</p>
+                        <p class="text-xs text-purple-600 uppercase">{{ $resume->file_type }}</p>
+                    </div>
+                    <a href="{{ $resume->file_url }}" target="_blank"
+                        class="text-xs bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg transition flex-shrink-0">
+                        {{ $resume->isImage() ? 'Lihat' : 'Unduh' }}
+                    </a>
+                </div>
+                @endif
+
+                {{-- Video YouTube (jika ada) --}}
+                @if($resume->video_url)
+                <div class="bg-red-50 border border-red-200 rounded-xl overflow-hidden mb-2">
+                    @if($resume->youtube_id)
+                    <div class="aspect-video">
+                        <iframe src="https://www.youtube.com/embed/{{ $resume->youtube_id }}"
+                            class="w-full h-full" frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen></iframe>
+                    </div>
+                    @else
+                    <div class="flex items-center gap-3 p-3">
+                        <svg class="w-5 h-5 text-red-500 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                        </svg>
+                        <a href="{{ $resume->video_url }}" target="_blank"
+                            class="text-sm text-red-700 underline hover:text-red-900 truncate">
+                            {{ $resume->video_url }}
+                        </a>
+                    </div>
+                    @endif
+                </div>
+                @endif
+
+                @if(!$resume->content && !$resume->hasFile() && !$resume->video_url)
+                <p class="text-xs text-gray-400 italic">Tidak ada konten resume.</p>
+                @endif
+
                 <p class="text-xs text-gray-400 mt-1">Dikirim {{ $resume->created_at->format('d M Y H:i') }}</p>
             </div>
 
