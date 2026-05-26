@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ExportController;
 use App\Http\Controllers\Student\AssessmentController;
 use App\Http\Controllers\Student\CourseController;
 use App\Http\Controllers\Student\FeedbackController;
@@ -11,6 +12,17 @@ use Illuminate\Support\Facades\Route;
 // Halaman utama
 Route::get('/', function () {
     return view('welcome');
+});
+
+// ─── Export (khusus admin yang sudah login) ────────────────────
+Route::middleware('auth')->prefix('export')->name('export.')->group(function () {
+    Route::get('/nilai/excel',                    [ExportController::class, 'nilaiExcel'])->name('nilai.excel');
+    Route::get('/nilai/excel/{courseId}',         [ExportController::class, 'nilaiExcel'])->name('nilai.excel.course');
+    Route::get('/nilai/excel/{courseId}/{matId}', [ExportController::class, 'nilaiExcel'])->name('nilai.excel.material');
+    Route::get('/nilai/pdf',                      [ExportController::class, 'nilaiPdf'])->name('nilai.pdf');
+    Route::get('/nilai/pdf/{courseId}',           [ExportController::class, 'nilaiPdf'])->name('nilai.pdf.course');
+    Route::get('/resume/excel',                   [ExportController::class, 'resumeExcel'])->name('resume.excel');
+    Route::get('/resume/excel/{courseId}',        [ExportController::class, 'resumeExcel'])->name('resume.excel.course');
 });
 
 // ─── Rute Siswa ───────────────────────────────────────────────

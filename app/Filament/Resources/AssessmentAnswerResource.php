@@ -152,6 +152,13 @@ class AssessmentAnswerResource extends Resource
                     ->label('Dikirim')
                     ->dateTime('d M Y H:i')
                     ->sortable(),
+                Tables\Columns\TextColumn::make('duration_minutes')
+                    ->label('Durasi')
+                    ->getStateUsing(fn ($record) => $record->duration_minutes)
+                    ->formatStateUsing(fn ($state) => $state ? "{$state} mnt" : '—')
+                    ->badge()
+                    ->color('gray')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\IconColumn::make('student_reply')
                     ->label('Dibalas Siswa')
                     ->boolean()
