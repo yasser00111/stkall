@@ -43,21 +43,19 @@ class ResumeExport implements FromCollection, WithHeadings, WithTitle, WithStyle
         }
 
         return $query->get()->map(function ($resume, $index) {
-            $statusLabel = match ($resume->status) {
-                'approved' => 'Disetujui',
-                'rejected' => 'Ditolak',
-                default    => 'Menunggu',
-            };
-
             return [
                 $index + 1,
-                $resume->studentSession->name ?? '—',
-                $resume->studentSession->class ?? '—',
-                $resume->material->course->title ?? '—',
-                $resume->material->title ?? '—',
-                $statusLabel,
-                $resume->teacher_feedback ?? '—',
-                $resume->student_reply ?? '—',
+                $resume->studentSession->name ?? '-',
+                $resume->studentSession->class ?? '-',
+                $resume->material->course->title ?? '-',
+                $resume->material->title ?? '-',
+                match ($resume->status) {
+                    'approved' => 'Disetujui',
+                    'rejected' => 'Ditolak',
+                    default    => 'Menunggu',
+                },
+                $resume->teacher_feedback ?? '-',
+                $resume->student_reply ?? '-',
                 $resume->created_at->format('d/m/Y H:i'),
             ];
         });
@@ -67,26 +65,50 @@ class ResumeExport implements FromCollection, WithHeadings, WithTitle, WithStyle
     {
         $lastRow = $sheet->getHighestRow();
 
+        // Header
         $sheet->getStyle('A1:I1')->applyFromArray([
             'font'      => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 11],
             'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '7C3AED']],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
         ]);
 
-        for ($row = 2; $row <= $lastRow; $row++) {
-            $color = ($row % 2 === 0) ? 'F5F3FF' : 'FFFFFF';
-            $sheet->getStyle("A{$row}:I{$row}")->applyFromArray([
-                'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $color]],
-                'alignment' => ['vertical' => Alignment::VERTICAL_CENTER, 'wrapText' => true],
-            ]);
-        }
-
-        $sheet->getStyle("A1:I{$lastRow}")->applyFromArray([
-            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'D1D5DB']]],
-        ]);
-
         $sheet->freezePane('A2');
         $sheet->getRowDimension(1)->setRowHeight(25);
+
+        // Data rows — hanya jika ada data
+        if ($lastRow >= 2) {
+            for ($row = 2; $row <= $lastRow; $row++) {
+                $bgColor = ($row % 2 === 0) ? 'F5F3FF' : 'FFFFFF';
+                $sheet->getStyle("A{$row}:I{$row}")->applyFromArray([
+                    'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bgColor]],
+                    'alignment' => ['vertical' => Alignment::VERTICAL_CENTER, 'wrapText' => true],
+                ]);
+
+                // Warnai kolom Status (F) berdasarkan nilai
+                $status = $sheet->getCell("F{$row}")->getValue();
+                $statusColors = [
+                    'Disetujui' => ['bg' => 'D1FAE5', 'txt' => '065F46'],
+                    'Ditolak'   => ['bg' => 'FEE2E2', 'txt' => '991B1B'],
+                    'Menunggu'  => ['bg' => 'FEF3C7', 'txt' => '92400E'],
+                ];
+                if (isset($statusColors[$status])) {
+                    $sheet->getStyle("F{$row}")->applyFromArray([
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $statusColors[$status]['bg']]],
+                        'font' => ['bold' => true, 'color' => ['rgb' => $statusColors[$status]['txt']]],
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                    ]);
+                }
+            }
+
+            $sheet->getStyle("A1:I{$lastRow}")->applyFromArray([
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => Border::BORDER_THIN,
+                        'color'       => ['rgb' => 'D1D5DB'],
+                    ],
+                ],
+            ]);
+        }
 
         return [];
     }
